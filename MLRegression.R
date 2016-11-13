@@ -23,11 +23,16 @@ lm.fit <- lm(medv ~ ., data = Boston)
 
 #Creating all Statistics as separate objects
 
-b <- ls(summary(lm.fit))
-for i in [1:length(b)]{
-        paste("lm.fit_",b[i],sep="") <- summary(lm.fit)$paste(b[i])
-        
-        
+b <- summary(lm.fit)
+
+for (i in 1:length(b)){
+        k <- unlist(b[i])
+        assign(paste("lm.fit_",names(b)[i],sep=""), k)
 }
 
+#Cleaning the environment
 
+lm.fit_Summary <- b
+rm(b)
+rm(k)
+rm(i)
