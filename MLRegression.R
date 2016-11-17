@@ -1,4 +1,5 @@
 # This function is for Multiple Linear Regression
+# For convenience: after running the code, you can run the command fix(models) to have a look at the models used here.
 
 #Preparing Data
 
@@ -18,7 +19,6 @@ rm(a)
 attach(Boston)
 
 #Fitting a multiple regression model of medv on all other variables in Boston
-
 lm.fit <- lm(medv ~ ., data = Boston)
 
 #Creating all Statistics as separate objects
@@ -36,3 +36,39 @@ lm.fit_Summary <- b
 rm(b)
 rm(k)
 rm(i)
+
+#Checking colinearity between variables within the model
+library(car)
+vif(lm.fit)
+
+#Regressing medv on all variables but rad
+lm.fit1 <- update(lm.fit, ~.-rad)
+vif(lm.fit1)
+
+#To denote an interaction term we use x1:x2. 
+lm.fit2 <- lm(medv~ lstat*age) #lstat*age = lstat + age + lstat:age
+
+#To check non-linear transformations of lstat
+#We use I() because ^ has a different meaning in R as opposed to denoting power
+lm.fit3 <- lm(medv~ lstat + I(lstat^2)) 
+
+#Comparing models with analysis of variance
+lm.fit4 <- lm(medv ~ lstat)
+anova(lm.fit4, lm.fit3)# Ho: Both models equally fit, H-alpha: Model2 is better 
+
+#To check for higher powers of lstat
+lm.fit5 <- lm(medv~poly(lstat, 5))
+lm.fit6 <- lm(medv~poly(lstat, 6))
+lm.fit8 <- lm(medv~poly(lstat,8))
+rbind(summary(lm.fit5)$coefficients, summary(lm.fit6)$coefficients, summary(lm.fit8)$coefficients)
+#the comparision shows powers upto 5 are relevant only 
+
+#For the convenience of the readers
+a <- c("lm.fit","lm.fit1", "lm.fit2", "lm.fit3", "lm.fit4", "lm.fit5", "lm.fit6", "lm.fit8")
+b <- c("medv~ all predictors", "medv~ .-rad", "medv~ lstat+age+lstat:age", "medv~ lstat+I(lstat^2)", "medv~ lstat", "medv~poly(lstat,5)", "medv~ poly(lstat, 6)","medv~ poly(lstat, 8)")
+models <- cbind(a,b)
+colnames(models) <- c("Model name", "Model description")
+rm(a)
+rm(b)
+
+
