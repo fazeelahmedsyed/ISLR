@@ -42,5 +42,39 @@ print("There is an obvious trend in the residual plot. The fit appears to be non
 lm.fit3 <- lm(mpg ~ cylinders*displacement + displacement*weight, data = Auto)
 summary(lm.fit3)
 
-#9(f)
+rm(a)
+rm(Auto)
+#10(a)
+Carseats <- Carseats
+lm.fit4 <- lm(Sales ~ Price + Urban + US, data = Carseats)
+summary(lm.fit4)
 
+#10(b)
+print("Since significance for the statistic for Urban is negligent, we can conclude that whether a store is in a rural or urban neighborhood has no impact on the amount of sales expected from that store. However, there is a significant impact of the location of the store w.r.t the country. A US store is expected to make 1200 unit sales more than a store outside US on average. Price has a significant impact as well. A price increase of one unit will decrease sales by 55 units on average.")
+
+#10(d)
+print("We can reject the null hypothesis for the predictors Price and US")
+
+#10(e)
+lm.fit5 <- lm(Sales ~ Price + US, data = Carseats)
+summary(lm.fit5)
+
+#10(f)
+print("Since the multiple R Squared figure and RSE for both the models only marginally improve, we cannot conclude if lm.fit5 fits the data better than lm.fit4. However lm.fit5 does not have any unsignificant variable included.")
+
+#10(g)
+confint(lm.fit5, level = 0.95)
+
+#10(h)
+#experimental: labels on the graph
+sort(hatvalues(lm.fit5), decreasing = T)[1:5]
+plot(hatvalues(lm.fit5), pch = 4, col = "dark grey")
+print("Observation no. 43 has unusually high leverage")
+
+#11(a)
+set.seed(1)
+x = rnorm(100)
+y = 2*x + rnorm(100)
+lm.fit6 <- lm(y ~ x + 0)
+summary(lm.fit6)
+print("The co-efficient estimate for x is 1.99 which is close to the actual model value of 2. Standard error of the estimate is 0.11, which means for every 100 samples we draw, 99 samples will contain a coefficient between 1.66 and 2.32")
