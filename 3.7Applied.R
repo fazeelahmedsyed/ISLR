@@ -1,4 +1,4 @@
-#This is for ISLR Exercise 3.7 Applied
+#This is for ISLR 3.7 Applied
 
 library(ISLR)
 Auto <- Auto
