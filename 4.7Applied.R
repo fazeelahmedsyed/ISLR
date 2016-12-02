@@ -182,3 +182,108 @@ a <- character
 a <- ls()
 rm(list = a)
 
+#13
+
+##Preparing data
+Boston <- Boston
+summary(Boston)
+crim01 <- rep(0, length(Boston$crim))
+crim01[Boston$crim > median(Boston$crim)] = 1
+Boston <- data.frame(crim01, Boston)
+
+##Exploring dependencies within variables
+Boston_cor <- cor(Boston)
+Boston_cor[,1]
+Boston$crim01 <- as.factor(Boston$crim01)
+for (i in 2:ncol(Boston)){
+        a <- paste("Boston$",sep = "", colnames(Boston)[i])
+        plot(Boston$crim01, Boston[,i], xlab = "Bostoncrim01", ylab = a)
+}
+print("Having had a look at correlations and the graphs, we can observe that crim01 has high magnitudes of correlations with the predictors: indus, nox, age, dis, rad and tax")
+print("The variables also make intuitive sense when correlations for crim are observed along of that of crim01")
+
+##Creating Training and Test set
+Boston_train <- Boston[1:430,]
+Boston_test <- Boston[431:506,]
+
+##Fitting Logistic Regression Model
+glm_fit <- glm(crim01 ~ indus+nox+age+dis+rad+tax, data = Boston_train, family = "binomial")
+summary(glm_fit)
+print("only nox and rad appear to be significant estimators")
+glm_probs <- predict(glm_fit, Boston_test, type = "response")
+glm_preds <- rep(0,length(glm_probs))
+glm_preds[glm_probs > 0.5] = 1
+glm_conf <- addmargins(table(Prediction = glm_preds, Actual = Boston_test$crim01))
+glm_conf
+glm_correct <- mean(glm_preds == Boston_test$crim01)
+glm_correct
+print("the model predicts an accurate response 93% of the times, based on the test error")
+
+###checking other possibilities to improve model
+glm2_fit <- glm(crim01 ~ nox+rad, data = Boston_train, family = "binomial")
+summary(glm2_fit)
+print("All estimators used in the model appear to be statistically significant")
+glm2_probs <- predict(glm2_fit, Boston_test, type = "response")
+glm2_preds <- rep(0,length(glm2_probs))
+glm2_preds[glm2_probs > 0.5] = 1
+glm2_conf <- addmargins(table(Prediction = glm2_preds, Actual = Boston_test$crim01))
+glm2_conf
+glm2_correct <- mean(glm2_preds == Boston_test$crim01)
+glm2_correct
+print("The model worsens which shows there are other variables or combination of variables which were left out initially that should be included in the model to explain the good fit in glm_fit.")
+
+#Cleaning environment
+a <- character
+a <- ls()
+a <- a[grep("^glm2",a)]
+rm(list = a)
+rm(i)
+
+##Fitting an LDA model
+library(MASS)
+lda_fit <- lda(crim01 ~ indus+nox+age+dis+rad+tax, data = Boston_train)
+lda_fit
+contrasts(Boston_train$crim01)
+lda_preds <- predict(lda_fit, Boston_test)
+lda_conf <- addmargins(table(Prediction = lda_preds$class, Actual = Boston_test$crim01))
+lda_conf
+lda_correct <- mean(lda_preds$class == Boston_test$crim01)
+lda_correct
+print("The model is worse off than glm_fit in predicting the correct outcome")
+
+##Fitting a QDA model
+qda_fit <- qda(crim01 ~ indus+nox+age+dis+rad+tax, data = Boston_train)
+qda_fit
+contrasts(Boston_train$crim01)
+qda_preds <- predict(qda_fit, Boston_test)
+qda_conf <- addmargins(table(Prediction = qda_preds$class, Actual = Boston_test$crim01))
+qda_conf
+qda_correct <- mean(qda_preds$class == Boston_test$crim01)
+qda_correct
+print("The model is better than lda but worse than glm in predicting the outcome")
+
+##Fitting a model using the KNN classifier for values of k 
+library(class)
+Boston_train_st <- scale(Boston_train[,-1])
+Boston_test_st <- scale(Boston_test[,-1])
+X_train <- Boston_train_st[,c(3,5,7,8,9,10)]
+X_test <- Boston_test_st[,c(3,5,7,8,9,10)]
+Y_train <- Boston_train$crim01
+Y_test <- Boston_test$crim01
+
+set.seed(1)
+knn1_preds <- knn(X_train, X_test, Y_train, k = 1)
+knn1_correct <- mean(knn1_preds == Y_test)
+knn1_correct
+
+set.seed(1)
+knn3_preds <- knn(X_train, X_test, Y_train, k = 3)
+knn3_correct <- mean(knn3_preds == Y_test)
+knn3_correct
+
+set.seed(1)
+knn7_preds <- knn(X_train, X_test, Y_train, k = 7)
+knn7_correct <- mean(knn7_preds == Y_test)
+knn7_correct
+
+print("the knn classifiers do a terrible job at predicting the outcomes compared to other models")
