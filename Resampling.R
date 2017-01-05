@@ -85,12 +85,12 @@ a <- a[-grep("^Auto", a)]
 rm(list = a)
 
 #K-FOLD CV
-
+#Here we are trying to find 10-FOLD CV Errors for models that contain different powers of horsepower.
 set.seed(17)
 Results_10fold <- rep(0,10)
 for (i in 1:10){
         lm_fit <- glm(mpg~ poly(horsepower, i), data = Auto)
-        Results_10fold[i] <- (cv.glm(Auto, lm_fit))$delta[1]
+        Results_10fold[i] <- (cv.glm(Auto, lm_fit, 10))$delta[1]
 }
 names(Results_10fold) <- c(1:10)
 Results_10fold
@@ -189,7 +189,7 @@ bootstrap <- function(data, model, train, P = 0.5,  ){
                 
                 }
         } Else if (model ==)
-lda_fit <- lda(default ~ balance + income, data = Default, family = "binomial")
-lda_fit
+
+UNDER CONSTRUCTION
 
 }
